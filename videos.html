@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -9,168 +10,215 @@
 
 <body data-page="videos">
 
-    <div class="world-container">
+```
+<div class="world-container">
 
-        <header class="topbar">
+    <header class="topbar">
 
-            <a href="home.html" class="brand">
-                🌍 KID WORLD
+        <a href="home.html" class="brand">
+            🌍 KID WORLD
+        </a>
+
+        <div class="profile">
+
+            <div class="avatar" id="avatar">
+                😊
+            </div>
+
+            <div class="profile-info">
+                <strong id="playerName">Player</strong>
+                <small id="playerUid">UID: KID-000000</small>
+            </div>
+
+            <a
+                href="accounts.html"
+                class="account-button"
+            >
+                ⚙️
             </a>
 
-            <div class="profile">
+        </div>
 
-                <div class="avatar" id="avatar">
-                    😊
-                </div>
+    </header>
 
-                <div class="profile-info">
-                    <strong id="playerName">Player</strong>
-                    <small id="playerUid">UID: KID-000000</small>
-                </div>
+    <nav class="navigation">
 
-                <a
-                    href="accounts.html"
-                    class="account-button"
-                >
-                    ⚙️
-                </a>
+        <a href="home.html" class="nav-button">
+            🏠 Home
+        </a>
+
+        <a href="games.html" class="nav-button">
+            🐦 Games
+        </a>
+
+        <a href="videos.html" class="nav-button active">
+            📺 Video Shop
+        </a>
+
+        <a href="wallet.html" class="nav-button">
+            🪙 Wallet
+        </a>
+
+        <a href="chat.html" class="nav-button">
+            💬 Live Chat
+        </a>
+
+    </nav>
+
+    <main>
+
+        <section class="page">
+
+            <div class="section-title">
+
+                <h2>📺 Video Shop</h2>
+
+                <p>
+                    Unlock your favorite KID WORLD videos.
+                </p>
 
             </div>
 
-        </header>
+            <div class="video-grid">
 
-        <nav class="navigation">
+                <!-- VIDEO 1 -->
 
-            <a href="home.html" class="nav-button">
-                🏠 Home
-            </a>
+                <div class="video-card">
 
-            <a href="games.html" class="nav-button">
-                🐦 Games
-            </a>
+                    <div
+                        class="video-player locked-video"
+                        data-video-id="Gf4qxkGbp7M"
+                    >
 
-            <a href="videos.html" class="nav-button active">
-                📺 Video Shop
-            </a>
+                        <div class="video-image">
+                            🔒
+                        </div>
 
-            <a href="wallet.html" class="nav-button">
-                🪙 Wallet
-            </a>
+                    </div>
 
-            <a href="chat.html" class="nav-button">
-                💬 Live Chat
-            </a>
+                    <div class="video-info">
 
-        </nav>
+                        <h3>
+                            TANK CARTOON S1
+                        </h3>
 
-        <main>
+                        <p>
+                            Kids Video
+                        </p>
 
-            <section class="page">
+                        <strong>
+                            🪙 100 PlayCoins
+                        </strong>
 
-                <div class="section-title">
-
-                    <h2>📺 Video Shop</h2>
-
-                    <p>
-                        Unlock your favorite KID WORLD videos.
-                    </p>
-
-                </div>
-
-                <div class="video-grid">
-
-                    <!-- VIDEO 1 -->
-
-                    <div class="video-card">
-
-                        <div
-                            class="video-player locked-video"
+                        <button
+                            class="main-button unlock-video-btn"
+                            data-cost="100"
                             data-video-id="Gf4qxkGbp7M"
+                            type="button"
                         >
-
-                            <div class="video-image">
-                                🔒
-                            </div>
-
-                        </div>
-
-                        <div class="video-info">
-
-                            <h3>
-                                TANK CARTOON S1
-                            </h3>
-
-                            <p>
-                                Kids Video
-                            </p>
-
-                            <strong>
-                                🪙 100 PlayCoins
-                            </strong>
-
-                            <button
-                                class="main-button unlock-video-btn"
-                                data-cost="100"
-                                data-video-id="Gf4qxkGbp7M"
-                                type="button"
-                            >
-                                🔓 Unlock Video
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                    <!-- VIDEO 2 -->
-
-                    <div class="video-card">
-
-                        <div
-                            class="video-player locked-video"
-                            data-video-id="ImvQ0n__sHg"
-                        >
-
-                            <div class="video-image">
-                                🔒
-                            </div>
-
-                        </div>
-
-                        <div class="video-info">
-
-                            <h3>
-                                TANK CARTOON S2
-                            </h3>
-
-                            <p>
-                                Kids Video
-                            </p>
-
-                            <strong>
-                                🪙 200 PlayCoins
-                            </strong>
-
-                            <button
-                                class="main-button unlock-video-btn"
-                                data-cost="200"
-                                data-video-id="ImvQ0n__sHg"
-                                type="button"
-                            >
-                                🔓 Unlock Video
-                            </button>
-
-                        </div>
+                            🔓 Unlock Video
+                        </button>
 
                     </div>
 
                 </div>
 
-            </section>
 
-        </main>
+                <!-- VIDEO 2 -->
 
-    </div>
+                <div class="video-card">
 
-    <script src="script.js"></script>
+                    <div
+                        class="video-player locked-video"
+                        data-video-id="ImvQ0n__sHg"
+                    >
+
+                        <div class="video-image">
+                            🔒
+                        </div>
+
+                    </div>
+
+                    <div class="video-info">
+
+                        <h3>
+                            TANK CARTOON S2
+                        </h3>
+
+                        <p>
+                            Kids Video
+                        </p>
+
+                        <strong>
+                            🪙 200 PlayCoins
+                        </strong>
+
+                        <button
+                            class="main-button unlock-video-btn"
+                            data-cost="200"
+                            data-video-id="ImvQ0n__sHg"
+                            type="button"
+                        >
+                            🔓 Unlock Video
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- VIDEO 3 -->
+
+                <div class="video-card">
+
+                    <div
+                        class="video-player locked-video"
+                        data-video-id="GtFHVL9-V5Y"
+                    >
+
+                        <div class="video-image">
+                            🔒
+                        </div>
+
+                    </div>
+
+                    <div class="video-info">
+
+                        <h3>
+                            TANK CARTOON S3
+                        </h3>
+
+                        <p>
+                            Kids Video
+                        </p>
+
+                        <strong>
+                            🪙 300 PlayCoins
+                        </strong>
+
+                        <button
+                            class="main-button unlock-video-btn"
+                            data-cost="300"
+                            data-video-id="GtFHVL9-V5Y"
+                            type="button"
+                        >
+                            🔓 Unlock Video
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script src="script.js"></script>
+```
+
 </body>
 </html>

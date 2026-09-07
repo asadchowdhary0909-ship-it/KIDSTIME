@@ -2011,3 +2011,1630 @@ document.addEventListener(
 
     }
 );
+
+/* =========================================================
+   KID WORLD
+   SUBSCRIPTION SYSTEM
+   FREE → PRO → ELITE → PREMIUM
+========================================================= */
+
+/* =========================================================
+   SUBSCRIPTION DATA
+========================================================= */
+
+const SUBSCRIPTIONS = {
+    FREE: {
+        name: "FREE",
+        price: 0,
+        dailyCoins: 0,
+        videoDiscount: 0,
+        color: "free"
+    },
+
+    PRO: {
+        name: "PRO",
+        price: 5000,
+        dailyCoins: 500,
+        videoDiscount: 50,
+        color: "blue"
+    },
+
+    ELITE: {
+        name: "ELITE",
+        price: 8000,
+        dailyCoins: 750,
+        videoDiscount: 100,
+        color: "gold"
+    },
+
+    PREMIUM: {
+        name: "PREMIUM",
+        price: 12000,
+        dailyCoins: 400,
+        videoDiscount: 200,
+        color: "purple"
+    }
+};
+
+
+/* =========================================================
+   SUBSCRIPTION NORMALIZATION
+========================================================= */
+
+function normalizeSubscription(account) {
+
+    if (!account) {
+        return;
+    }
+
+    if (
+        !account.subscription ||
+        !SUBSCRIPTIONS[account.subscription]
+    ) {
+        account.subscription = "FREE";
+    }
+
+    if (
+        typeof account.subscriptionLastDailyClaim !==
+        "string"
+    ) {
+        account.subscriptionLastDailyClaim = "";
+    }
+
+    if (
+        typeof account.latestVideoNotificationCount !==
+        "number"
+    ) {
+        account.latestVideoNotificationCount = 0;
+    }
+
+    if (
+        typeof account.subscriptionOfferDate !==
+        "string"
+    ) {
+        account.subscriptionOfferDate = "";
+    }
+
+    if (
+        typeof account.subscriptionOfferType !==
+        "string"
+    ) {
+        account.subscriptionOfferType = "";
+    }
+}
+
+
+/* =========================================================
+   GET CURRENT SUBSCRIPTION
+========================================================= */
+
+function getCurrentSubscription() {
+
+    if (!currentAccount) {
+        return SUBSCRIPTIONS.FREE;
+    }
+
+    normalizeSubscription(currentAccount);
+
+    return (
+        SUBSCRIPTIONS[currentAccount.subscription] ||
+        SUBSCRIPTIONS.FREE
+    );
+}
+
+
+/* =========================================================
+   GET SUBSCRIPTION NAME
+========================================================= */
+
+function getSubscriptionName() {
+
+    return getCurrentSubscription().name;
+}
+
+
+/* =========================================================
+   SUBSCRIPTION PRICE
+========================================================= */
+
+function getSubscriptionPrice(type) {
+
+    if (!SUBSCRIPTIONS[type]) {
+        return 0;
+    }
+
+    let price = SUBSCRIPTIONS[type].price;
+
+    /*
+       ELITE gets cheaper prices for other subscription
+       purchases.
+
+       PREMIUM gets an even bigger discount.
+    */
+
+    if (
+        currentAccount &&
+        currentAccount.subscription === "ELITE" &&
+        type !== "ELITE"
+    ) {
+        price = Math.floor(price * 0.90);
+    }
+
+    if (
+        currentAccount &&
+        currentAccount.subscription === "PREMIUM" &&
+        type !== "PREMIUM"
+    ) {
+        price = Math.floor(price * 0.80);
+    }
+
+    return price;
+}
+
+
+/* =========================================================
+   VIDEO PRICE DISCOUNT
+========================================================= */
+
+function getDiscountedVideoCost(originalCost) {
+
+    const subscription =
+        getCurrentSubscription();
+
+    const discount =
+        Number(subscription.videoDiscount) || 0;
+
+    const original =
+        Number(originalCost);
+
+    if (
+        !Number.isFinite(original) ||
+        original <= 0
+    ) {
+        return 0;
+    }
+
+    return Math.max(
+        0,
+        original - discount
+    );
+}
+
+
+/* =========================================================
+   TODAY'S DATE
+========================================================= */
+
+function getSubscriptionDate() {
+
+    const now = new Date();
+
+    return (
+        now.getFullYear() +
+        "-" +
+        String(
+            now.getMonth() + 1
+        ).padStart(2, "0") +
+        "-" +
+        String(
+            now.getDate()
+        ).padStart(2, "0")
+    );
+}
+
+
+/* =========================================================
+   CLAIM DAILY SUBSCRIPTION COINS
+========================================================= */
+
+function claimSubscriptionDailyCoins() {
+
+    if (!currentAccount) {
+        return false;
+    }
+
+    normalizeSubscription(currentAccount);
+
+    const subscription =
+        getCurrentSubscription();
+
+    if (
+        subscription.dailyCoins <= 0
+    ) {
+        return false;
+    }
+
+    const today =
+        getSubscriptionDate();
+
+    if (
+        currentAccount.subscriptionLastDailyClaim ===
+        today
+    ) {
+        return false;
+    }
+
+    currentAccount.subscriptionLastDailyClaim =
+        today;
+
+    saveCurrentAccount();
+
+    addCoins(
+        subscription.dailyCoins,
+        "👑 " +
+        subscription.name +
+        " daily reward"
+    );
+
+    return true;
+}
+
+
+/* =========================================================
+   SUBSCRIPTION DAILY OFFER
+========================================================= */
+
+function generateSubscriptionDailyOffer() {
+
+    if (!currentAccount) {
+        return null;
+    }
+
+    normalizeSubscription(currentAccount);
+
+    const today =
+        getSubscriptionDate();
+
+    const offers = [
+        "💰 Cheaper subscription offers today!",
+        "🎁 BUY 1 GET 1 FREE offer today!",
+        "🐦 Flappy Bird score ×10 and ×2 today!",
+        "🔥 Special subscription discount today!"
+    ];
+
+    if (
+        currentAccount.subscriptionOfferDate !==
+        today
+    ) {
+
+        const index =
+            Math.floor(
+                Math.random() *
+                offers.length
+            );
+
+        currentAccount.subscriptionOfferDate =
+            today;
+
+        currentAccount.subscriptionOfferType =
+            offers[index];
+
+        saveCurrentAccount();
+    }
+
+    return currentAccount.subscriptionOfferType;
+}
+
+
+/* =========================================================
+   BUY SUBSCRIPTION
+========================================================= */
+
+function purchaseSubscription(type) {
+
+    if (!currentAccount) {
+
+        alert(
+            "Please log in first."
+        );
+
+        return;
+    }
+
+    if (!SUBSCRIPTIONS[type]) {
+        return;
+    }
+
+    normalizeSubscription(currentAccount);
+
+    if (
+        currentAccount.subscription === type
+    ) {
+
+        alert(
+            "You already have " +
+            SUBSCRIPTIONS[type].name +
+            " subscription."
+        );
+
+        return;
+    }
+
+    const price =
+        getSubscriptionPrice(type);
+
+    if (
+        currentAccount.balance < price
+    ) {
+
+        alert(
+            "You need " +
+            price +
+            " PlayCoins to purchase " +
+            SUBSCRIPTIONS[type].name +
+            ".\n\nYour balance: " +
+            currentAccount.balance +
+            " PlayCoins."
+        );
+
+        return;
+    }
+
+    const confirmed =
+        window.confirm(
+            "Purchase " +
+            SUBSCRIPTIONS[type].name +
+            " for " +
+            price +
+            " PlayCoins?"
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+    const success =
+        spendCoins(
+            price,
+            "👑 Purchased " +
+            SUBSCRIPTIONS[type].name
+        );
+
+    if (!success) {
+        return;
+    }
+
+    currentAccount.subscription =
+        type;
+
+    currentAccount.subscriptionLastDailyClaim =
+        "";
+
+    saveCurrentAccount();
+
+    applySubscriptionAvatarEffect();
+
+    alert(
+        "🎉 Congratulations!\n\n" +
+        "You are now a " +
+        SUBSCRIPTIONS[type].name +
+        " member!"
+    );
+
+    claimSubscriptionDailyCoins();
+
+    renderSubscriptionPage();
+}
+
+
+/* =========================================================
+   SUBSCRIPTION AVATAR EFFECT
+========================================================= */
+
+function applySubscriptionAvatarEffect() {
+
+    normalizeSubscription(currentAccount);
+
+    const subscription =
+        getCurrentSubscription();
+
+    const avatars =
+        document.querySelectorAll(
+            "#avatar, #accountAvatar, .avatar, .saved-avatar"
+        );
+
+    avatars.forEach(avatar => {
+
+        avatar.classList.remove(
+            "kid-pro-avatar",
+            "kid-elite-avatar",
+            "kid-premium-avatar"
+        );
+
+        if (
+            subscription.name === "PRO"
+        ) {
+
+            avatar.classList.add(
+                "kid-pro-avatar"
+            );
+        }
+
+        if (
+            subscription.name === "ELITE"
+        ) {
+
+            avatar.classList.add(
+                "kid-elite-avatar"
+            );
+        }
+
+        if (
+            subscription.name === "PREMIUM"
+        ) {
+
+            avatar.classList.add(
+                "kid-premium-avatar"
+            );
+        }
+    });
+}
+
+
+/* =========================================================
+   SUBSCRIPTION CSS
+========================================================= */
+
+function injectSubscriptionStyles() {
+
+    if (
+        document.getElementById(
+            "kidWorldSubscriptionStyles"
+        )
+    ) {
+        return;
+    }
+
+    const style =
+        document.createElement(
+            "style"
+        );
+
+    style.id =
+        "kidWorldSubscriptionStyles";
+
+    style.textContent = `
+
+        /* PRO */
+
+        .kid-pro-avatar {
+            border: 4px solid #2196f3 !important;
+            box-shadow:
+                0 0 8px #2196f3,
+                0 0 18px #2196f3,
+                0 0 30px #64b5f6 !important;
+        }
+
+
+        /* ELITE */
+
+        .kid-elite-avatar {
+            border: 4px solid #d4af37 !important;
+            box-shadow:
+                0 0 8px #d4af37,
+                0 0 18px #ffd700,
+                0 0 30px #8b7500 !important;
+        }
+
+
+        /* PREMIUM */
+
+        .kid-premium-avatar {
+            border: 4px solid #9c27b0 !important;
+            box-shadow:
+                0 0 8px #9c27b0,
+                0 0 18px #e040fb,
+                0 0 30px #4a148c !important;
+        }
+
+
+        /* SUBSCRIPTION PAGE */
+
+        .kid-subscription-page {
+            padding: 20px;
+        }
+
+        .kid-subscription-title {
+            text-align: center;
+            font-size: 30px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .kid-current-pass {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .kid-subscription-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(
+                        230px,
+                        1fr
+                    )
+                );
+            gap: 20px;
+        }
+
+        .kid-subscription-card {
+            padding: 20px;
+            border-radius: 20px;
+            background: rgba(
+                255,
+                255,
+                255,
+                0.95
+            );
+            box-shadow:
+                0 8px 20px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.15
+                );
+            text-align: center;
+        }
+
+        .kid-subscription-card h2 {
+            margin-top: 0;
+        }
+
+        .kid-subscription-card ul {
+            text-align: left;
+            line-height: 1.8;
+        }
+
+        .kid-subscription-button {
+            width: 100%;
+            padding: 12px;
+            border: 0;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .kid-subscription-button:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+    `;
+
+    document.head.appendChild(
+        style
+    );
+}
+
+
+/* =========================================================
+   CREATE SUBSCRIPTION PAGE
+========================================================= */
+
+function createSubscriptionPage() {
+
+    if (
+        document.getElementById(
+            "subscriptionsPage"
+        )
+    ) {
+        return;
+    }
+
+    const page =
+        document.createElement(
+            "section"
+        );
+
+    page.id =
+        "subscriptionsPage";
+
+    page.className =
+        "page hidden kid-subscription-page";
+
+    page.dataset.page =
+        "subscriptions";
+
+    page.innerHTML = `
+
+        <div class="kid-subscription-title">
+            👑 KID WORLD PASSES
+        </div>
+
+        <div
+            id="kidCurrentSubscription"
+            class="kid-current-pass"
+        ></div>
+
+        <div
+            id="kidSubscriptionOffer"
+            class="kid-current-pass"
+        ></div>
+
+        <div
+            id="kidSubscriptionCards"
+            class="kid-subscription-grid"
+        ></div>
+
+    `;
+
+    const main =
+        document.querySelector(
+            "main"
+        );
+
+    if (main) {
+        main.appendChild(page);
+    } else {
+        document.body.appendChild(
+            page
+        );
+    }
+}
+
+
+/* =========================================================
+   RENDER SUBSCRIPTION CARDS
+========================================================= */
+
+function renderSubscriptionPage() {
+
+    if (!currentAccount) {
+        return;
+    }
+
+    createSubscriptionPage();
+
+    const page =
+        document.getElementById(
+            "subscriptionsPage"
+        );
+
+    if (!page) {
+        return;
+    }
+
+    const current =
+        getCurrentSubscription();
+
+    const currentText =
+        document.getElementById(
+            "kidCurrentSubscription"
+        );
+
+    const offerText =
+        document.getElementById(
+            "kidSubscriptionOffer"
+        );
+
+    const cards =
+        document.getElementById(
+            "kidSubscriptionCards"
+        );
+
+    if (currentText) {
+
+        currentText.innerHTML =
+            "Current Pass: <strong>" +
+            current.name +
+            "</strong>";
+    }
+
+    if (offerText) {
+
+        const offer =
+            generateSubscriptionDailyOffer();
+
+        offerText.textContent =
+            offer
+                ? "🎁 DAILY OFFER: " + offer
+                : "";
+    }
+
+    if (!cards) {
+        return;
+    }
+
+    cards.innerHTML = "";
+
+    const types = [
+        "PRO",
+        "ELITE",
+        "PREMIUM"
+    ];
+
+    types.forEach(type => {
+
+        const data =
+            SUBSCRIPTIONS[type];
+
+        const card =
+            document.createElement(
+                "div"
+            );
+
+        card.className =
+            "kid-subscription-card";
+
+        const price =
+            getSubscriptionPrice(type);
+
+        let extraDiscount = "";
+
+        if (
+            currentAccount.subscription ===
+            "ELITE" &&
+            type !== "ELITE"
+        ) {
+
+            extraDiscount =
+                "<li>🔥 ELITE other-pass discount: 10%</li>";
+        }
+
+        if (
+            currentAccount.subscription ===
+            "PREMIUM" &&
+            type !== "PREMIUM"
+        ) {
+
+            extraDiscount =
+                "<li>🔥 PREMIUM other-pass discount: 20%</li>";
+        }
+
+        let specialFeatures = "";
+
+        if (type === "PRO") {
+
+            specialFeatures = `
+                <li>🔵 Shiny blue PRO avatar effect</li>
+                <li>🎁 Daily special offers</li>
+            `;
+        }
+
+        if (type === "ELITE") {
+
+            specialFeatures = `
+                <li>🟡 Shiny gold ELITE avatar effect</li>
+                <li>🎁 Cheaper daily offers</li>
+                <li>🎁 Buy 1 Get 1 FREE offers</li>
+                <li>🐦 Flappy Bird score ×10 then ×2</li>
+                <li>🔔 Latest video notifications</li>
+                <li>🎁 +100 PlayCoins when buying videos</li>
+                ${extraDiscount}
+            `;
+        }
+
+        if (type === "PREMIUM") {
+
+            specialFeatures = `
+                <li>🟣 Shiny purple PREMIUM avatar effect</li>
+                <li>🎁 More cheaper daily offers</li>
+                <li>🎁 Buy 1 Get 1 FREE offers</li>
+                <li>🐦 Flappy Bird score ×10 then ×2</li>
+                <li>🔥 More subscription discounts</li>
+                ${extraDiscount}
+            `;
+        }
+
+        const isCurrent =
+            currentAccount.subscription ===
+            type;
+
+        card.innerHTML = `
+
+            <h2>
+                ${type}
+            </h2>
+
+            <h3>
+                ${price} 🪙
+            </h3>
+
+            <ul>
+
+                <li>
+                    🪙 ${data.dailyCoins}
+                    PlayCoins daily
+                </li>
+
+                <li>
+                    📺 ${data.videoDiscount}
+                    PlayCoins video discount
+                </li>
+
+                ${specialFeatures}
+
+            </ul>
+
+            <button
+                class="kid-subscription-button"
+                data-subscription="${type}"
+                ${isCurrent ? "disabled" : ""}
+            >
+                ${
+                    isCurrent
+                        ? "✅ CURRENT PASS"
+                        : "BUY " + type + " 👑"
+                }
+            </button>
+        `;
+
+        const button =
+            card.querySelector(
+                ".kid-subscription-button"
+            );
+
+        if (button && !isCurrent) {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    purchaseSubscription(
+                        type
+                    );
+
+                }
+            );
+        }
+
+        cards.appendChild(card);
+    });
+}
+
+
+/* =========================================================
+   ADD PASSES NAVIGATION BUTTON
+========================================================= */
+
+function createSubscriptionNavigation() {
+
+    const existing =
+        document.querySelector(
+            '[data-page="subscriptions"]'
+        );
+
+    if (existing) {
+        return;
+    }
+
+    const nav =
+        document.querySelector(
+            "nav"
+        );
+
+    if (!nav) {
+        return;
+    }
+
+    const button =
+        document.createElement(
+            "button"
+        );
+
+    button.type =
+        "button";
+
+    button.className =
+        "nav-button";
+
+    button.dataset.page =
+        "subscriptions";
+
+    button.textContent =
+        "👑 Passes";
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            if (
+                typeof showPage ===
+                "function"
+            ) {
+
+                showPage(
+                    "subscriptions"
+                );
+
+            } else {
+
+                document
+                    .querySelectorAll(
+                        ".page"
+                    )
+                    .forEach(page => {
+
+                        page.classList.add(
+                            "hidden"
+                        );
+
+                    });
+
+                const page =
+                    document.getElementById(
+                        "subscriptionsPage"
+                    );
+
+                if (page) {
+
+                    page.classList.remove(
+                        "hidden"
+                    );
+
+                }
+
+            }
+
+            renderSubscriptionPage();
+        }
+    );
+
+    nav.appendChild(
+        button
+    );
+}
+
+
+/* =========================================================
+   PREMIUM LATEST VIDEO NOTIFICATION
+========================================================= */
+
+function checkPremiumVideoNotification() {
+
+    if (!currentAccount) {
+        return;
+    }
+
+    if (
+        currentAccount.subscription !==
+        "PREMIUM"
+    ) {
+        return;
+    }
+
+    const videoCards =
+        document.querySelectorAll(
+            ".video-card"
+        );
+
+    const count =
+        videoCards.length;
+
+    const oldCount =
+        Number(
+            currentAccount.latestVideoNotificationCount ||
+            0
+        );
+
+    if (count <= oldCount) {
+        return;
+    }
+
+    currentAccount.latestVideoNotificationCount =
+        count;
+
+    saveCurrentAccount();
+
+    if (
+        "Notification" in window
+    ) {
+
+        if (
+            Notification.permission ===
+            "granted"
+        ) {
+
+            new Notification(
+                "👑 KID WORLD PREMIUM",
+                {
+                    body:
+                        "🎬 A new video is available!"
+                }
+            );
+
+        } else if (
+            Notification.permission ===
+            "default"
+        ) {
+
+            Notification.requestPermission()
+                .then(permission => {
+
+                    if (
+                        permission ===
+                        "granted"
+                    ) {
+
+                        new Notification(
+                            "👑 KID WORLD PREMIUM",
+                            {
+                                body:
+                                    "🎬 A new video is available!"
+                            }
+                        );
+
+                    }
+
+                })
+                .catch(
+                    () => {}
+                );
+        }
+    }
+}
+
+
+/* =========================================================
+   SUBSCRIPTION FLAPPY BIRD SCORE
+========================================================= */
+
+function getSubscriptionGameScore(
+    baseScore
+) {
+
+    if (!currentAccount) {
+        return baseScore;
+    }
+
+    const subscription =
+        currentAccount.subscription;
+
+    if (
+        subscription === "ELITE" ||
+        subscription === "PREMIUM"
+    ) {
+
+        return (
+            baseScore *
+            10 *
+            2
+        );
+    }
+
+    return baseScore;
+}
+
+
+/* =========================================================
+   UPDATE FLAPPY BIRD SCORE
+========================================================= */
+
+function updateSubscriptionGameScore() {
+
+    const score =
+        document.getElementById(
+            "gameScore"
+        );
+
+    if (!score) {
+        return;
+    }
+
+    score.textContent =
+        getSubscriptionGameScore(
+            gameScore
+        );
+}
+
+
+/* =========================================================
+   SUBSCRIPTION INITIALIZATION
+========================================================= */
+
+function initializeSubscriptions() {
+
+    if (currentAccount) {
+
+        normalizeSubscription(
+            currentAccount
+        );
+
+        saveCurrentAccount();
+
+        /*
+           Claim daily reward.
+           This can only happen once per date.
+        */
+
+        claimSubscriptionDailyCoins();
+
+        applySubscriptionAvatarEffect();
+
+        createSubscriptionPage();
+
+        createSubscriptionNavigation();
+
+        renderSubscriptionPage();
+
+        checkPremiumVideoNotification();
+    }
+}
+
+
+/* =========================================================
+   PATCH VIDEO SHOP
+========================================================= */
+
+function initializeSubscriptionVideoPrices() {
+
+    const buttons =
+        document.querySelectorAll(
+            ".unlock-video-btn"
+        );
+
+    buttons.forEach(button => {
+
+        const originalCost =
+            Number(
+                button.dataset.cost
+            );
+
+        if (
+            !Number.isFinite(
+                originalCost
+            )
+        ) {
+            return;
+        }
+
+        const discountedCost =
+            getDiscountedVideoCost(
+                originalCost
+            );
+
+        /*
+           Store original price so we never
+           permanently destroy the original
+           dataset price.
+        */
+
+        button.dataset.originalCost =
+            String(
+                originalCost
+            );
+
+        button.dataset.cost =
+            String(
+                discountedCost
+            );
+
+        if (
+            !currentAccount.unlockedVideos.includes(
+                button.dataset.videoId
+            )
+        ) {
+
+            const card =
+                button.closest(
+                    ".video-card"
+                );
+
+            if (card) {
+
+                const priceElements =
+                    card.querySelectorAll(
+                        ".video-price, .price, [data-price]"
+                    );
+
+                priceElements.forEach(
+                    element => {
+
+                        const originalText =
+                            element.textContent;
+
+                        if (
+                            !element.dataset.originalPriceText
+                        ) {
+
+                            element.dataset.originalPriceText =
+                                originalText;
+                        }
+
+                        if (
+                            discountedCost <
+                            originalCost
+                        ) {
+
+                            element.textContent =
+                                discountedCost +
+                                " 🪙";
+                        }
+
+                    }
+                );
+            }
+        }
+    });
+}
+
+
+/* =========================================================
+   PREMIUM VIDEO PURCHASE BONUS
+========================================================= */
+
+function givePremiumVideoBonus() {
+
+    if (!currentAccount) {
+        return;
+    }
+
+    if (
+        currentAccount.subscription !==
+        "PREMIUM"
+    ) {
+        return;
+    }
+
+    addCoins(
+        100,
+        "👑 PREMIUM video purchase bonus"
+    );
+}
+
+
+/* =========================================================
+   PATCH ORIGINAL VIDEO UNLOCK
+========================================================= */
+
+const originalInitializeVideosPage =
+    initializeVideosPage;
+
+initializeVideosPage =
+    function () {
+
+        if (!currentAccount) {
+            return;
+        }
+
+        normalizeSubscription(
+            currentAccount
+        );
+
+        const buttons =
+            document.querySelectorAll(
+                ".unlock-video-btn"
+            );
+
+        buttons.forEach(button => {
+
+            if (
+                button.dataset.subscriptionPatched ===
+                "true"
+            ) {
+                return;
+            }
+
+            button.dataset.subscriptionPatched =
+                "true";
+
+            const videoID =
+                button.dataset.videoId;
+
+            const originalCost =
+                Number(
+                    button.dataset.cost
+                );
+
+            const cost =
+                getDiscountedVideoCost(
+                    originalCost
+                );
+
+            if (
+                currentAccount.unlockedVideos.includes(
+                    videoID
+                )
+            ) {
+
+                unlockVideoUI(
+                    videoID,
+                    button
+                );
+
+                return;
+            }
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    if (
+                        currentAccount.unlockedVideos.includes(
+                            videoID
+                        )
+                    ) {
+
+                        unlockVideoUI(
+                            videoID,
+                            button
+                        );
+
+                        return;
+                    }
+
+                    const finalCost =
+                        getDiscountedVideoCost(
+                            originalCost
+                        );
+
+                    if (
+                        currentAccount.balance <
+                        finalCost
+                    ) {
+
+                        alert(
+                            "You need " +
+                            finalCost +
+                            " PlayCoins to unlock this video.\n\n" +
+                            "Original price: " +
+                            originalCost +
+                            " PlayCoins.\n" +
+                            "Your discount: " +
+                            getCurrentSubscription().videoDiscount +
+                            " PlayCoins.\n\n" +
+                            "Your balance: " +
+                            currentAccount.balance +
+                            " PlayCoins."
+                        );
+
+                        return;
+                    }
+
+                    const success =
+                        spendCoins(
+                            finalCost,
+                            "📺 Unlocked video"
+                        );
+
+                    if (!success) {
+                        return;
+                    }
+
+                    currentAccount.unlockedVideos.push(
+                        videoID
+                    );
+
+                    saveCurrentAccount();
+
+                    unlockVideoUI(
+                        videoID,
+                        button
+                    );
+
+                    /*
+                       PREMIUM receives +100 PlayCoins
+                       after purchasing a video.
+                    */
+
+                    givePremiumVideoBonus();
+
+                }
+            );
+
+        });
+
+        initializeSubscriptionVideoPrices();
+
+        checkPremiumVideoNotification();
+    };
+
+
+/* =========================================================
+   PATCH FLAPPY BIRD SCORE
+========================================================= */
+
+const originalUpdateGameScore =
+    updateGameScore;
+
+updateGameScore =
+    function () {
+
+        const score =
+            document.getElementById(
+                "gameScore"
+            );
+
+        if (!score) {
+            return;
+        }
+
+        score.textContent =
+            getSubscriptionGameScore(
+                gameScore
+            );
+    };
+
+
+/* =========================================================
+   PATCH FLAPPY BIRD REWARD
+========================================================= */
+
+const originalEndGame =
+    endGame;
+
+endGame =
+    function () {
+
+        gameRunning = false;
+
+        if (gameAnimation) {
+
+            cancelAnimationFrame(
+                gameAnimation
+            );
+
+            gameAnimation = null;
+        }
+
+        const finalScore =
+            getSubscriptionGameScore(
+                gameScore
+            );
+
+        if (
+            currentAccount &&
+            finalScore > 0
+        ) {
+
+            const reward =
+                finalScore * 10;
+
+            addCoins(
+                reward,
+                "🐦 Flappy Bird score: " +
+                finalScore
+            );
+
+            alert(
+                "Game Over! 🐦\n\n" +
+                "Base Score: " +
+                gameScore +
+                "\n" +
+                "Final Score: " +
+                finalScore +
+                "\n" +
+                "Reward: +" +
+                reward +
+                " PlayCoins"
+            );
+
+        } else {
+
+            alert(
+                "Game Over! 🐦\n\n" +
+                "Try again!"
+            );
+        }
+
+        const button =
+            document.getElementById(
+                "startGameBtn"
+            );
+
+        if (button) {
+
+            button.textContent =
+                "PLAY AGAIN 🐦";
+        }
+
+        const text =
+            document.getElementById(
+                "gameText"
+            );
+
+        if (text) {
+
+            text.textContent =
+                "GAME OVER!";
+        }
+    };
+
+
+/* =========================================================
+   REPAIR EXISTING ACCOUNTS
+========================================================= */
+
+const originalRepairAccounts =
+    repairAccounts;
+
+repairAccounts =
+    function () {
+
+        originalRepairAccounts();
+
+        accounts.forEach(
+            account => {
+
+                normalizeSubscription(
+                    account
+                );
+
+            }
+        );
+
+        saveAccounts();
+    };
+
+
+/* =========================================================
+   PATCH CREATE ACCOUNT
+========================================================= */
+
+const originalCreateAccount =
+    createAccount;
+
+createAccount =
+    function (name) {
+
+        const result =
+            originalCreateAccount(
+                name
+            );
+
+        if (
+            result &&
+            result.success &&
+            result.account
+        ) {
+
+            normalizeSubscription(
+                result.account
+            );
+
+            saveAccounts();
+        }
+
+        return result;
+    };
+
+
+/* =========================================================
+   RUN SUBSCRIPTION SYSTEM
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        setTimeout(
+            () => {
+
+                if (
+                    typeof currentAccount !==
+                    "undefined" &&
+                    currentAccount
+                ) {
+
+                    normalizeSubscription(
+                        currentAccount
+                    );
+
+                    saveCurrentAccount();
+
+                    injectSubscriptionStyles();
+
+                    createSubscriptionPage();
+
+                    createSubscriptionNavigation();
+
+                    claimSubscriptionDailyCoins();
+
+                    applySubscriptionAvatarEffect();
+
+                    renderSubscriptionPage();
+
+                    checkPremiumVideoNotification();
+
+                }
+
+            },
+            100
+        );
+
+    }
+);

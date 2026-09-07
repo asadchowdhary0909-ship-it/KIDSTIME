@@ -72,7 +72,7 @@ const SUBSCRIPTIONS = {
 
     PREMIUM: {
         name: "PREMIUM",
-        price: 1000,
+        price: 12000,
         dailyCoins: 400,
         videoDiscount: 200,
         color: "premium",

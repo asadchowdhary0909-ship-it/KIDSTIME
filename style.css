@@ -1496,3 +1496,298 @@ a {
     }
 
 }
+
+/* =========================================================
+   SUBSCRIPTIONS
+========================================================= */
+
+.subscription-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.subscription-card {
+    position: relative;
+    overflow: hidden;
+    padding: 28px 22px;
+    text-align: center;
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    border: 2px solid transparent;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
+}
+
+.subscription-card:hover {
+    transform: translateY(-5px);
+    box-shadow:
+        0 22px 48px rgba(50, 55, 130, 0.18);
+}
+
+.subscription-icon {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 19px;
+    font-size: 32px;
+}
+
+.subscription-card h2 {
+    font-size: 25px;
+    margin-bottom: 8px;
+}
+
+.subscription-card > p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.subscription-features {
+    margin: 20px 0;
+    text-align: left;
+}
+
+.subscription-features p {
+    padding: 9px 0;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.subscription-features p:last-child {
+    border-bottom: none;
+}
+
+.subscription-card > strong {
+    display: block;
+    margin: 18px 0;
+    font-size: 20px;
+}
+
+/* FREE */
+
+.subscription-free {
+    background: var(--white);
+    border-color: #edf0fa;
+}
+
+.subscription-free .subscription-icon {
+    background: #eef0ff;
+}
+
+.subscription-free > strong {
+    color: var(--muted);
+}
+
+/* PRO */
+
+.subscription-pro {
+    background:
+        linear-gradient(
+            145deg,
+            #effaff,
+            #dff4ff,
+            #edf1ff
+        );
+    border-color: #38bdf8;
+}
+
+.subscription-pro .subscription-icon {
+    background:
+        linear-gradient(
+            135deg,
+            #38bdf8,
+            #1684d8
+        );
+    box-shadow:
+        0 8px 22px rgba(22, 132, 216, 0.28);
+}
+
+.subscription-pro h2 {
+    color: #1684d8;
+}
+
+.subscription-pro > strong {
+    color: #1684d8;
+}
+
+/* ELITE */
+
+.subscription-elite {
+    background:
+        linear-gradient(
+            145deg,
+            #fffbea,
+            #fff3c4,
+            #fff8dc
+        );
+    border-color: #e0aa19;
+}
+
+.subscription-elite .subscription-icon {
+    background:
+        linear-gradient(
+            135deg,
+            #ffd84d,
+            #c58a00
+        );
+    box-shadow:
+        0 8px 22px rgba(197, 138, 0, 0.28);
+}
+
+.subscription-elite h2 {
+    color: #b27a00;
+}
+
+.subscription-elite > strong {
+    color: #b27a00;
+}
+
+/* PREMIUM */
+
+.subscription-premium {
+    background:
+        linear-gradient(
+            145deg,
+            #f7f0ff,
+            #eadfff,
+            #f3eaff
+        );
+    border-color: #7c4dff;
+}
+
+.subscription-premium .subscription-icon {
+    background:
+        linear-gradient(
+            135deg,
+            #9b6cff,
+            #5b35d5
+        );
+    box-shadow:
+        0 8px 22px rgba(91, 53, 213, 0.3);
+}
+
+.subscription-premium h2 {
+    color: #5b35d5;
+}
+
+.subscription-premium > strong {
+    color: #5b35d5;
+}
+
+/* SUBSCRIPTION BUTTON */
+
+.subscription-button {
+    width: 100%;
+    padding: 13px 15px;
+    border: none;
+    border-radius: 13px;
+    color: white;
+    font-weight: 900;
+    cursor: pointer;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
+}
+
+.subscription-button:hover {
+    transform: translateY(-2px);
+}
+
+.subscription-button:disabled {
+    cursor: default;
+    color: var(--muted);
+    background: #eef0f6;
+    box-shadow: none;
+}
+
+.subscription-pro .subscription-button {
+    background:
+        linear-gradient(
+            135deg,
+            #1684d8,
+            #38bdf8
+        );
+    box-shadow:
+        0 9px 22px rgba(22, 132, 216, 0.24);
+}
+
+.subscription-elite .subscription-button {
+    background:
+        linear-gradient(
+            135deg,
+            #b27a00,
+            #e0aa19
+        );
+    box-shadow:
+        0 9px 22px rgba(178, 122, 0, 0.24);
+}
+
+.subscription-premium .subscription-button {
+    background:
+        linear-gradient(
+            135deg,
+            #5b35d5,
+            #9b6cff
+        );
+    box-shadow:
+        0 9px 22px rgba(91, 53, 213, 0.24);
+}
+
+/* SUBSCRIPTION RESPONSIVE */
+
+@media (max-width: 1050px) {
+
+    .subscription-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+@media (max-width: 520px) {
+
+    .subscription-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .subscription-card {
+        padding: 25px 20px;
+    }
+
+}
+
+/* =========================================================
+   SUBSCRIPTION AVATAR EFFECTS
+========================================================= */
+
+.subscription-pro-avatar {
+    border: 3px solid #38bdf8;
+    box-shadow:
+        0 0 8px #38bdf8,
+        0 0 18px rgba(56, 189, 248, 0.7);
+}
+
+.subscription-elite-avatar {
+    border: 3px solid #d9a400;
+    box-shadow:
+        0 0 8px #ffd84d,
+        0 0 18px rgba(217, 164, 0, 0.7);
+}
+
+.subscription-premium-avatar {
+    border: 3px solid #7c4dff;
+    box-shadow:
+        0 0 8px #9b6cff,
+        0 0 18px rgba(124, 77, 255, 0.7);
+}
+
+.current-subscription {
+    transform: translateY(-3px);
+}
